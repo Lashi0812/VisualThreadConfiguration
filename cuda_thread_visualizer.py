@@ -41,9 +41,9 @@ def save_grid_png(df,grid_dim,block_dim,out_filename):
   fig, ax = plt.subplots(figsize=(grid_size_x,grid_size_y))
 
   # (0, 'blk_y') (1, 'blk_x') (2, 'warp') (3, 'th_y') (4, 'th_x') 
-  for idx,blk in df.groupby(["blk_y","blk_x"]):
-      blk_y = idx[0] * block_dim[0]
-      blk_x = idx[1] * block_dim[1]
+  for blk_idx,blk in df.groupby(["blk_y","blk_x"]):
+      blk_y = blk_idx[0] * block_dim[0]
+      blk_x = blk_idx[1] * block_dim[1]
       
       ax.add_patch(plt.Rectangle((blk_x,blk_y),block_dim[1],block_dim[0],fc=generate_random_hex_color(),ec="black"))    
       warp_colors = [generate_random_hex_color() for _ in range(blk["warp"].max()+1)]
@@ -52,9 +52,18 @@ def save_grid_png(df,grid_dim,block_dim,out_filename):
           ry = blk_y + i[3] 
           ax.add_patch(plt.Rectangle((rx,ry), 0.9, 0.9,ec="black",fc=warp_colors[i[2]],alpha=0.7))
           cx = rx + 0.9/2.0
-          cy = ry + 0.9/2.0
-          ax.annotate((i[3],i[4]), (cx, cy), color='w', weight='bold', 
-                  fontsize=10, ha='center', va='center')
+          cy2 = ry + 2.0 * (0.9/5.0)
+          cy3 = ry + 3.0 * (0.9/5.0)
+          cy4 = ry + 4.0 * (0.9/5.0)
+          ax.annotate((i[3],i[4]), (cx, cy2), color='w', weight='bold', 
+                  fontsize=8, ha='center', va='center')
+          naive = ry * grid_size_x +rx
+          ax.annotate(f"N:{naive}", (cx, cy3), color='w', weight='bold', 
+                  fontsize=8, ha='center', va='center')
+          # global block id in the grid * total thread in block + thread id within block
+          coalesce = ((blk_idx[0] *  grid_dim[1] + blk_idx[1]) * (block_dim[0] * block_dim[1]) ) + (i[3] * block_dim[1] + i[4])
+          ax.annotate(f"C:{coalesce}", (cx, cy4), color='w', weight='bold', 
+                  fontsize=8, ha='center', va='center')
 
   # Set the aspect ratio to equal so squares are square
   ax.set_aspect('equal')
@@ -81,7 +90,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.out_filename is None:
-        args.out_filename = f"./asset/out_{args.grid_dim_x}x{args.grid_dim_x}_{args.block_dim_x}x{args.block_dim_x}.png"
+        args.out_filename = f"./asset/out_{args.grid_dim_x}x{args.grid_dim_y}_{args.block_dim_x}x{args.block_dim_y}.png"
         
 
     run_index(args.grid_dim_x,args.grid_dim_y,args.block_dim_x,args.block_dim_y)
