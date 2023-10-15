@@ -47,21 +47,21 @@ def save_grid_png(df,grid_dim,block_dim,out_filename):
       
       ax.add_patch(plt.Rectangle((blk_x,blk_y),block_dim[1],block_dim[0],fc=generate_random_hex_color(),ec="black"))    
       warp_colors = [generate_random_hex_color() for _ in range(blk["warp"].max()+1)]
-      for i in blk.values:        
-          rx = blk_x + i[4] 
-          ry = blk_y + i[3] 
-          ax.add_patch(plt.Rectangle((rx,ry), 0.9, 0.9,ec="black",fc=warp_colors[i[2]],alpha=0.7))
+      for i,row in blk.iterrows():        
+          rx = blk_x + row.th_x 
+          ry = blk_y + row.th_y 
+          ax.add_patch(plt.Rectangle((rx,ry), 0.9, 0.9,ec="black",fc=warp_colors[row.warp],alpha=0.7))
           cx = rx + 0.9/2.0
           cy2 = ry + 2.0 * (0.9/5.0)
           cy3 = ry + 3.0 * (0.9/5.0)
           cy4 = ry + 4.0 * (0.9/5.0)
-          ax.annotate((i[3],i[4]), (cx, cy2), color='w', weight='bold', 
+          ax.annotate((row.th_y,row.th_x), (cx, cy2), color='w', weight='bold', 
                   fontsize=8, ha='center', va='center')
           naive = ry * grid_size_x +rx
           ax.annotate(f"N:{naive}", (cx, cy3), color='w', weight='bold', 
                   fontsize=8, ha='center', va='center')
           # global block id in the grid * total thread in block + thread id within block
-          coalesce = ((blk_idx[0] *  grid_dim[1] + blk_idx[1]) * (block_dim[0] * block_dim[1]) ) + (i[3] * block_dim[1] + i[4])
+          coalesce = ((blk_idx[0] *  grid_dim[1] + blk_idx[1]) * (block_dim[0] * block_dim[1]) ) + (row.th_y * block_dim[1] + row.th_x)
           ax.annotate(f"C:{coalesce}", (cx, cy4), color='w', weight='bold', 
                   fontsize=8, ha='center', va='center')
 
